@@ -1,0 +1,51 @@
+
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            name 'Google'
+            url "libraries/m2repository"
+        }
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.2'
+
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion "27.0.0"
+    defaultConfig {
+        minSdkVersion 24
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+
+repositories {
+    mavenCentral()
+    maven {
+        name 'Google'
+        url "libraries/m2repository"
+    }
+}
+
+dependencies {
+    compile 'de.javagl:obj:0.2.1'
+    compile 'com.google.ar:core:0.91.0'
+    compile 'com.facebook.react:react-native:+'
+    compile group: 'com.drewnoakes', name: 'metadata-extractor', version: '2.9.1'
+    compile "com.google.zxing:core:3.2.1"
+    compile 'com.android.support:design:+'
+    compile 'com.android.support:appcompat-v7:+'
+}
+  
