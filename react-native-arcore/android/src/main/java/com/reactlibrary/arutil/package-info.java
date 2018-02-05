@@ -16,4 +16,4 @@
 /**
  * A sample showing how to build an Augmented Reality app using ARCore.
  */
-package com.reactlibrary.helloar;
+package com.reactlibrary.arutil;

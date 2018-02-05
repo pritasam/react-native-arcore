@@ -2,12 +2,10 @@
 package com.reactlibrary;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
-import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -16,24 +14,29 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeArray;
+import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
-import com.google.ar.core.PointCloud;
 import com.google.ar.core.Session;
 import com.google.ar.core.Trackable;
 import com.google.ar.core.Trackable.TrackingState;
 import com.google.ar.core.exceptions.UnavailableApkTooOldException;
 import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
-import com.reactlibrary.helloar.rendering.DisplayRotationHelper;
-import com.reactlibrary.helloar.rendering.ObjectRenderer;
-import com.reactlibrary.helloar.rendering.ObjectRenderer.BlendMode;
-import com.reactlibrary.helloar.rendering.PlaneRenderer;
-import com.reactlibrary.helloar.rendering.PointCloudRenderer;
+import com.reactlibrary.arutil.rendering.DisplayRotationHelper;
+import com.reactlibrary.arutil.rendering.ObjectRenderer;
+import com.reactlibrary.arutil.rendering.ObjectRenderer.BlendMode;
+import com.reactlibrary.arutil.rendering.PlaneRenderer;
+import com.reactlibrary.arutil.rendering.PointCloudRenderer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,14 +46,12 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 
-
-
-public class RNReactNativeArCoreView extends GLSurfaceView implements GLSurfaceView.Renderer {
+public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceView.Renderer {
 
     private static final String TAG = RNReactNativeArCoreView.class.getSimpleName();
 
 
-    private Context mContextModule;
+    private ThemedReactContext mContextModule;
 
 
     private GLSurfaceView mSurfaceView;
@@ -60,7 +61,7 @@ public class RNReactNativeArCoreView extends GLSurfaceView implements GLSurfaceV
     private Snackbar mMessageSnackbar;
     private DisplayRotationHelper mDisplayRotationHelper;
 
-    private final com.reactlibrary.helloar.rendering.BackgroundRenderer mBackgroundRenderer = new com.reactlibrary.helloar.rendering.BackgroundRenderer();
+    private final com.reactlibrary.arutil.rendering.BackgroundRenderer mBackgroundRenderer = new com.reactlibrary.arutil.rendering.BackgroundRenderer();
     private final ObjectRenderer mVirtualObject = new ObjectRenderer();
     private final ObjectRenderer mVirtualObjectShadow = new ObjectRenderer();
     private final PlaneRenderer mPlaneRenderer = new PlaneRenderer();
@@ -73,12 +74,20 @@ public class RNReactNativeArCoreView extends GLSurfaceView implements GLSurfaceV
     private final ArrayBlockingQueue<MotionEvent> mQueuedSingleTaps = new ArrayBlockingQueue<>(16);
     private final ArrayList<Anchor> mAnchors = new ArrayList<>();
 
+    private CoreViewCallback callback;
 
-    public RNReactNativeArCoreView(Context context) {
+    public interface CoreViewCallback {
+        void planeDetected(WritableMap event);
+        void planeHitDetected(WritableMap event);
+    }
+
+    public RNReactNativeArCoreView(ThemedReactContext context, CoreViewCallback callback) {
         super(context);
+        this.callback = callback;
         mContextModule = context;
-        this.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-
+      //  this.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        mSurfaceView = new GLSurfaceView(context);
+        this.addView(mSurfaceView);
         mDisplayRotationHelper = new DisplayRotationHelper(/*context=*/ context);
         // Set up tap listener.
         mGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
@@ -136,6 +145,14 @@ public class RNReactNativeArCoreView extends GLSurfaceView implements GLSurfaceV
             showSnackbarMessage("This device does not support AR", true);
         }
         mSession.configure(config);
+        hasCameraPermissions();
+        if (mSession != null) {
+            showLoadingMessage();
+            // Note that order matters - see the note in onPause(), the reverse applies here.
+            mSession.resume();
+        }
+        mSurfaceView.onResume();
+        mDisplayRotationHelper.onResume();
     }
 
     private boolean hasCameraPermissions() {
@@ -176,6 +193,50 @@ public class RNReactNativeArCoreView extends GLSurfaceView implements GLSurfaceV
         mPointCloud.createOnGlThread(/*context=*/mContextModule);
     }
 
+
+    public void passPlaneDetectedData() {
+        WritableMap event = Arguments.createMap();
+        event.putBoolean("planeDetected", true);
+        WritableArray array = new WritableNativeArray();
+        int i = 0;
+        for (Plane plane : mSession.getAllTrackables(Plane.class)) {
+            if (plane.getTrackingState() == TrackingState.TRACKING) {
+                i = 1;
+                WritableMap map = new WritableNativeMap();
+                map.putDouble("x",plane.getCenterPose().tx());
+                map.putDouble("y",plane.getCenterPose().ty());
+                map.putDouble("z",plane.getCenterPose().tz());
+                map.putDouble("id",plane.hashCode());
+                array.pushMap(map);
+            }
+        }
+        if (callback != null && i > 0) {
+            event.putArray("planes",array);
+            callback.planeDetected(event);
+        }
+    }
+
+    public void passPlaneHitDetectedData( float[] projectionMatrix, float[] viewMatrix) {
+        WritableMap projection =  JsonUtils.createMapFromFloat(projectionMatrix);
+        WritableMap viewMap =  JsonUtils.createMapFromFloat(viewMatrix);
+        for (Anchor anchor : mAnchors) {
+            if (anchor.getTrackingState() != TrackingState.TRACKING) {
+                continue;
+            }
+            WritableMap map = new WritableNativeMap();
+            map.putBoolean("planeHitDetected", true);
+            map.putDouble("x",anchor.getPose().tx());
+            map.putDouble("y",anchor.getPose().ty());
+            map.putDouble("z",anchor.getPose().tz());
+            map.putDouble("id",anchor.hashCode());
+            map.putDouble("projection",anchor.hashCode());
+            map.putDouble("viewMap",anchor.hashCode());
+            if (callback != null) {
+                callback.planeHitDetected(map);
+            }
+        }
+    }
+
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         mDisplayRotationHelper.onSurfaceChanged(width, height);
@@ -184,6 +245,7 @@ public class RNReactNativeArCoreView extends GLSurfaceView implements GLSurfaceV
 
     @Override
     public void onDrawFrame(GL10 gl) {
+
         // Clear screen to notify driver it should not load any pixels from previous frame.
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
@@ -211,7 +273,7 @@ public class RNReactNativeArCoreView extends GLSurfaceView implements GLSurfaceV
                             && ((Plane) trackable).isPoseInPolygon(hit.getHitPose())) {
                         // Cap the number of objects created. This avoids overloading both the
                         // rendering system and ARCore.
-                        if (mAnchors.size() >= 20) {
+                        if (mAnchors.size() >= 1) {
                             mAnchors.get(0).detach();
                             mAnchors.remove(0);
                         }
@@ -238,13 +300,14 @@ public class RNReactNativeArCoreView extends GLSurfaceView implements GLSurfaceV
             camera.getViewMatrix(viewmtx, 0);
             // Compute lighting from average intensity of the image.
             final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
-            // Visualize tracked points.
+          /*  // Visualize tracked points.
             PointCloud pointCloud = frame.acquirePointCloud();
             mPointCloud.update(pointCloud);
             mPointCloud.draw(viewmtx, projmtx);
             // Application is responsible for releasing the point cloud resources after
             // using it.
-            pointCloud.release();
+            pointCloud.release();*/
+            passPlaneDetectedData();
             // Check if we detected at least one plane. If so, hide the loading message.
             if (mMessageSnackbar != null) {
                 for (Plane plane : mSession.getAllTrackables(Plane.class)) {
@@ -260,6 +323,8 @@ public class RNReactNativeArCoreView extends GLSurfaceView implements GLSurfaceV
                     mSession.getAllTrackables(Plane.class), camera.getDisplayOrientedPose(), projmtx);
             // Visualize anchors created by touch.
             float scaleFactor = 1.0f;
+            passPlaneHitDetectedData(projmtx,viewmtx);
+             /*
             for (Anchor anchor : mAnchors) {
                 if (anchor.getTrackingState() != TrackingState.TRACKING) {
                     continue;
@@ -272,7 +337,7 @@ public class RNReactNativeArCoreView extends GLSurfaceView implements GLSurfaceV
                 mVirtualObjectShadow.updateModelMatrix(mAnchorMatrix, scaleFactor);
                 mVirtualObject.draw(viewmtx, projmtx, lightIntensity);
                 mVirtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
-            }
+            }*/
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
@@ -280,7 +345,7 @@ public class RNReactNativeArCoreView extends GLSurfaceView implements GLSurfaceV
     }
 
     private void showSnackbarMessage(String message, boolean finishOnDismiss) {
-        mMessageSnackbar = Snackbar.make(
+    /*    mMessageSnackbar = Snackbar.make(
                 this.findViewById(android.R.id.content),
                 message, Snackbar.LENGTH_INDEFINITE);
         mMessageSnackbar.getView().setBackgroundColor(0xbf323232);
@@ -302,7 +367,7 @@ public class RNReactNativeArCoreView extends GLSurfaceView implements GLSurfaceV
                         }
                     });
         }
-        mMessageSnackbar.show();
+        mMessageSnackbar.show();*/
     }
 
     private void showLoadingMessage() {

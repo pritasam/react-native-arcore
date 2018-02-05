@@ -33,7 +33,6 @@ public class RNReactNativeArcoreViewManager extends ViewGroupManager<RNReactNati
         }
     }
 
-
     @Override
     protected RNReactNativeArcoreMainView createViewInstance(ThemedReactContext reactContext) {
         return new RNReactNativeArcoreMainView(reactContext, mContextModule.getActivity());

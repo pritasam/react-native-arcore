@@ -16,4 +16,4 @@
 /**
  * This package contains classes that do the rendering for this example.
  */
-package com.reactlibrary.helloar.rendering;
+package com.reactlibrary.arutil.rendering;
