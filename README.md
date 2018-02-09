@@ -17,7 +17,7 @@
 
 #### Android
 
-1. Open up `android/app/src/main/java/[...]/MainActivity.java`
+1. Open up `android   /Users/pritambolenwar/Repository/ReactNative/Nightshift/node_modules/react-native/android/app/src/main/java/[...]/MainActivity.java`
   - Add `import com.reactlibrary.RNReactNativeArcorePackage;` to the imports at the top of the file
   - Add `new RNReactNativeArcorePackage()` to the list returned by the `getPackages()` method
 2. Append the following lines to `android/settings.gradle`:
@@ -29,14 +29,9 @@
   	```
       compile project(':react-native-react-native-arcore')
   	```
+4. Copy the  Folder Google from /libraries/m2repository/com  into the   node_modules/react-native/android/com/
 
-#### Windows
-[Read it! :D](https://github.com/ReactWindows/react-native)
-
-1. In Visual Studio add the `RNReactNativeArcore.sln` in `node_modules/react-native-react-native-arcore/windows/RNReactNativeArcore.sln` folder to their solution, reference from their app.
-2. Open up your `MainPage.cs` app
-  - Add `using React.Native.Arcore.RNReactNativeArcore;` to the usings at the top of the file
-  - Add `new RNReactNativeArcorePackage()` to the `List<IReactPackage>` returned by the `Packages` method
+5. Copy the  Folder include from /libraries/include  into the   node_modules/react-native/android/
 
 
 ## Usage
