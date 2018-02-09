@@ -16,8 +16,6 @@ public class RNReactNativeArcorePackage implements ReactPackage {
         List<NativeModule> modules = new ArrayList<>();
         modules.add(RNReactNativeArcoreViewManager.mContextModule);
         return modules;
-      //  return Collections.emptyList();
-
     }
 
     @Override

@@ -33,8 +33,6 @@ public class RNReactNativeArcoreMainView extends LinearLayout implements RNReact
         super(context);
         Log.d("React:", "RNReactNativeArcoreMainView single");
         this.setBackgroundColor(Color.BLUE);
-        //this.buttonsLayout = this.buttonsLayout();
-        //this.addView(buttonsLayout);
          this.arCoreView = new RNReactNativeArCoreView(this.getContext(),this);
          this.addView(arCoreView);
          setLayoutParams(new android.view.ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -44,13 +42,8 @@ public class RNReactNativeArcoreMainView extends LinearLayout implements RNReact
     public RNReactNativeArcoreMainView(ThemedReactContext context, Activity activity)
     {
         super(context);
-        Log.d("React:", "RNReactNativeArcoreMainView(Contructtor)");
-      //  mOriginalOrientation = activity.getRequestedOrientation();
-     //   mActivity = activity;
-      //  this.setOrientation(LinearLayout.VERTICAL);
-        // add the buttons and signature views
+        Log.d("React:", "RNReactNativeArcoreMainView(Constructor)");
         this.setBackgroundColor(Color.BLUE);
-         //this.buttonsLayout = this.buttonsLayout();
         this.arCoreView = new RNReactNativeArCoreView(this.getContext(),this);
         this.addView(arCoreView);
         setLayoutParams(new android.view.ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -83,7 +76,7 @@ public class RNReactNativeArcoreMainView extends LinearLayout implements RNReact
     @Override
     public void onViewAdded(View child) {
         if (this.arCoreView == child) return;
-        Log.d("React:", "RNReactNativeArcoreMainVie");
+        Log.d("React:", "onViewAdded");
         // remove and readd view to make sure it is in the back.
         // @TODO figure out why there was a z order issue in the first place and fix accordingly.
         this.removeView(this.arCoreView);
@@ -116,7 +109,6 @@ public class RNReactNativeArcoreMainView extends LinearLayout implements RNReact
 
     public void setViewMode(String viewMode) {
         this.viewMode = viewMode;
-
         if (viewMode.equalsIgnoreCase("portrait")) {
           //  mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else if (viewMode.equalsIgnoreCase("landscape")) {
@@ -135,6 +127,4 @@ public class RNReactNativeArcoreMainView extends LinearLayout implements RNReact
         ReactContext reactContext = (ReactContext) getContext();
         reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(getId(), "topChange", event);
     }
-
-
 }

@@ -51,12 +51,9 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
 
     private static final String TAG = RNReactNativeArCoreView.class.getSimpleName();
 
-
     private Context mContextModule;
 
-
     private GLSurfaceView mSurfaceView;
-
     private Session mSession;
     private GestureDetector mGestureDetector;
     private Snackbar mMessageSnackbar;
@@ -138,10 +135,8 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
         }
         if (message != null) {
             showSnackbarMessage(message, true);
-            //Log.e(TAG, "Exception creating session", exception);
             return;
         }
-        // Create default config and check if supported.
         Config config = new Config(mSession);
         if (!mSession.isSupported(config)) {
             showSnackbarMessage("This device does not support AR", true);
@@ -150,7 +145,6 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
         hasCameraPermissions();
         if (mSession != null) {
             showLoadingMessage();
-            // Note that order matters - see the note in onPause(), the reverse applies here.
             mSession.resume();
         }
         mSurfaceView.onResume();
@@ -170,33 +164,6 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         Log.e(TAG, "onAttachedToWindow");
-    /*    Handler mainHandler = new Handler(mContextModule.getMainLooper());
-        Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-                mSession.resume();
-                mSurfaceView.onResume();
-                mDisplayRotationHelper.onResume();
-            } // This is your code
-        };
-        mainHandler.post(myRunnable);*/
-
-     /*
-             Handler mainHandler = new Handler(context.getMainLooper());
-        Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-
-            } // This is your code
-        };
-        mainHandler.post(myRunnable);
-     requestRender();
-        mSurfaceView.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-            }
-        });*/
     }
 
     public void passPlaneDetectedData() {
@@ -248,8 +215,6 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         Log.e(TAG, "onSurfaceCreated");
-
-        // Create the texture and pass it to ARCore session to be filled during update().
         mBackgroundRenderer.createOnGlThread(/*context=*/ mContextModule);
         if (mSession != null) {
             mSession.setCameraTextureName(mBackgroundRenderer.getTextureId());
@@ -335,15 +300,7 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
             // Get camera matrix and draw.
             float[] viewmtx = new float[16];
             camera.getViewMatrix(viewmtx, 0);
-            // Compute lighting from average intensity of the image.
             final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
-          /*  // Visualize tracked points.
-            PointCloud pointCloud = frame.acquirePointCloud();
-            mPointCloud.update(pointCloud);
-            mPointCloud.draw(viewmtx, projmtx);
-            // Application is responsible for releasing the point cloud resources after
-            // using it.
-            pointCloud.release();*/
             passPlaneDetectedData();
             // Check if we detected at least one plane. If so, hide the loading message.
             if (mMessageSnackbar != null) {
@@ -358,23 +315,8 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
             // Visualize planes.
             mPlaneRenderer.drawPlanes(
                     mSession.getAllTrackables(Plane.class), camera.getDisplayOrientedPose(), projmtx);
-            // Visualize anchors created by touch.
             float scaleFactor = 1.0f;
             passPlaneHitDetectedData(projmtx,viewmtx);
-             /*
-            for (Anchor anchor : mAnchors) {
-                if (anchor.getTrackingState() != TrackingState.TRACKING) {
-                    continue;
-                }
-                // Get the current pose of an Anchor in world space. The Anchor pose is updated
-                // during calls to session.update() as ARCore refines its estimate of the world.
-                anchor.getPose().toMatrix(mAnchorMatrix, 0);
-                // Update and draw the model and its shadow.
-                mVirtualObject.updateModelMatrix(mAnchorMatrix, scaleFactor);
-                mVirtualObjectShadow.updateModelMatrix(mAnchorMatrix, scaleFactor);
-                mVirtualObject.draw(viewmtx, projmtx, lightIntensity);
-                mVirtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
-            }*/
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
@@ -382,29 +324,6 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
     }
 
     private void showSnackbarMessage(String message, boolean finishOnDismiss) {
-    /*    mMessageSnackbar = Snackbar.make(
-                this.findViewById(android.R.id.content),
-                message, Snackbar.LENGTH_INDEFINITE);
-        mMessageSnackbar.getView().setBackgroundColor(0xbf323232);
-        if (finishOnDismiss) {
-            mMessageSnackbar.setAction(
-                    "Dismiss",
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            mMessageSnackbar.dismiss();
-                        }
-                    });
-            mMessageSnackbar.addCallback(
-                    new BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                        @Override
-                        public void onDismissed(Snackbar transientBottomBar, int event) {
-                            super.onDismissed(transientBottomBar, event);
-                           // finish();
-                        }
-                    });
-        }
-        mMessageSnackbar.show();*/
     }
 
     private void showLoadingMessage() {

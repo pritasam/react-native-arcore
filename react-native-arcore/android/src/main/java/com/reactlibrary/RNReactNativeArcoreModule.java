@@ -30,7 +30,6 @@ public class RNReactNativeArcoreModule extends ReactContextBaseJavaModule {
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent intent) {
 
-
     }
   };
 
@@ -48,7 +47,7 @@ public class RNReactNativeArcoreModule extends ReactContextBaseJavaModule {
       public void execute(NativeViewHierarchyManager nativeViewHierarchyManager) {
         RNReactNativeArcoreMainView coremainView = (RNReactNativeArcoreMainView) nativeViewHierarchyManager.resolveView(viewTag);
         try {
-          //cameraView.resumeRendering();
+          //coremainView.resumeRendering();
         } catch (Exception e) {
           promise.reject("E_CAMERA_BAD_VIEWTAG", "takePictureAsync: Expected a Camera component");
         }

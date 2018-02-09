@@ -13,9 +13,7 @@ public class RNReactNativeArcoreViewManager extends ViewGroupManager<RNReactNati
 
     public static final String PROPS_VIEW_MODE = "viewMode";
 
-
     public static  RNReactNativeArcoreModule mContextModule;
-
 
     public RNReactNativeArcoreViewManager(ReactApplicationContext reactContext) {
         mContextModule = new RNReactNativeArcoreModule(reactContext);
