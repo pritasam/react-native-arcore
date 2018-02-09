@@ -2,9 +2,7 @@
 package com.reactlibrary;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
@@ -14,13 +12,14 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
@@ -46,13 +45,12 @@ import java.util.concurrent.ArrayBlockingQueue;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-
-public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceView.Renderer {
+public class TestSurface extends FrameLayout implements GLSurfaceView.Renderer {
 
     private static final String TAG = RNReactNativeArCoreView.class.getSimpleName();
 
 
-    private Context mContextModule;
+    private ThemedReactContext mContextModule;
 
 
     private GLSurfaceView mSurfaceView;
@@ -82,16 +80,21 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
         void planeHitDetected(WritableMap event);
     }
 
-    public RNReactNativeArCoreView(Context context, CoreViewCallback callback) {
+    public void resumeRendering() {
+        Log.e(TAG, "Calling rendering");
+        mSession.resume();
+        mSurfaceView.onResume();
+        mDisplayRotationHelper.onResume();
+    }
+
+    public TestSurface(ThemedReactContext context) {
         super(context);
-        this.setOrientation(LinearLayout.HORIZONTAL);
-        this.setBackgroundColor(Color.WHITE);
         this.callback = callback;
         mContextModule = context;
-      //  this.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-        mSurfaceView =  new GLSurfaceView(mContextModule);
+        //  this.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        mSurfaceView = new GLSurfaceView(context);
         this.addView(mSurfaceView);
-        mDisplayRotationHelper = new DisplayRotationHelper(/*context=*/ mContextModule);
+        mDisplayRotationHelper = new DisplayRotationHelper(/*context=*/ context);
         // Set up tap listener.
         mGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -119,10 +122,11 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
         mSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Alpha used for plane blending.
         mSurfaceView.setRenderer(this);
         mSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+
         Exception exception = null;
         String message = null;
         try {
-            mSession = new Session(/* context= */ mContextModule);
+            mSession = new Session(/* context= */ context);
         } catch (UnavailableArcoreNotInstalledException e) {
             message = "Please install ARCore";
             exception = e;
@@ -167,87 +171,10 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        Log.e(TAG, "onAttachedToWindow");
-    /*    Handler mainHandler = new Handler(mContextModule.getMainLooper());
-        Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-                mSession.resume();
-                mSurfaceView.onResume();
-                mDisplayRotationHelper.onResume();
-            } // This is your code
-        };
-        mainHandler.post(myRunnable);*/
-
-     /*
-             Handler mainHandler = new Handler(context.getMainLooper());
-        Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-
-            } // This is your code
-        };
-        mainHandler.post(myRunnable);
-     requestRender();
-        mSurfaceView.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-            }
-        });*/
-    }
-
-    public void passPlaneDetectedData() {
-        WritableMap event = Arguments.createMap();
-        event.putBoolean("planeDetected", true);
-        WritableArray array = new WritableNativeArray();
-        int i = 0;
-        for (Plane plane : mSession.getAllTrackables(Plane.class)) {
-            if (plane.getTrackingState() == TrackingState.TRACKING) {
-                i = 1;
-                WritableMap map = new WritableNativeMap();
-                map.putDouble("x",plane.getCenterPose().tx());
-                map.putDouble("y",plane.getCenterPose().ty());
-                map.putDouble("z",plane.getCenterPose().tz());
-                map.putDouble("id",plane.hashCode());
-                array.pushMap(map);
-            }
-        }
-        if (callback != null && i > 0) {
-            event.putArray("planes",array);
-            callback.planeDetected(event);
-        }
-    }
-
-    public void passPlaneHitDetectedData( float[] projectionMatrix, float[] viewMatrix) {
-        Log.e(TAG, "Failed to read plane texture");
-        WritableMap projection =  JsonUtils.createMapFromFloat(projectionMatrix);
-        WritableMap viewMap =  JsonUtils.createMapFromFloat(viewMatrix);
-        for (Anchor anchor : mAnchors) {
-            if (anchor.getTrackingState() != TrackingState.TRACKING) {
-                continue;
-            }
-            WritableMap map = new WritableNativeMap();
-            map.putBoolean("planeHitDetected", true);
-            map.putDouble("x",anchor.getPose().tx());
-            map.putDouble("y",anchor.getPose().ty());
-            map.putDouble("z",anchor.getPose().tz());
-            map.putDouble("id",anchor.hashCode());
-            map.putMap("projection",projection);
-            map.putMap("viewMap",viewMap);
-            if (callback != null) {
-                callback.planeHitDetected(map);
-            }
-        }
-    }
-
-
-    @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         Log.e(TAG, "onSurfaceCreated");
+
+        GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
         // Create the texture and pass it to ARCore session to be filled during update().
         mBackgroundRenderer.createOnGlThread(/*context=*/ mContextModule);
@@ -275,9 +202,53 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
     }
 
 
+    public void passPlaneDetectedData() {
+        WritableMap event = Arguments.createMap();
+        event.putBoolean("planeDetected", true);
+        WritableArray array = new WritableNativeArray();
+        int i = 0;
+        for (Plane plane : mSession.getAllTrackables(Plane.class)) {
+            if (plane.getTrackingState() == TrackingState.TRACKING) {
+                i = 1;
+                WritableMap map = new WritableNativeMap();
+                map.putDouble("x",plane.getCenterPose().tx());
+                map.putDouble("y",plane.getCenterPose().ty());
+                map.putDouble("z",plane.getCenterPose().tz());
+                map.putDouble("id",plane.hashCode());
+                array.pushMap(map);
+            }
+        }
+        if (callback != null && i > 0) {
+            event.putArray("planes",array);
+            callback.planeDetected(event);
+        }
+    }
+
+    public void passPlaneHitDetectedData( float[] projectionMatrix, float[] viewMatrix) {
+        WritableMap projection =  JsonUtils.createMapFromFloat(projectionMatrix);
+        WritableMap viewMap =  JsonUtils.createMapFromFloat(viewMatrix);
+        for (Anchor anchor : mAnchors) {
+            if (anchor.getTrackingState() != TrackingState.TRACKING) {
+                continue;
+            }
+            WritableMap map = new WritableNativeMap();
+            map.putBoolean("planeHitDetected", true);
+            map.putDouble("x",anchor.getPose().tx());
+            map.putDouble("y",anchor.getPose().ty());
+            map.putDouble("z",anchor.getPose().tz());
+            map.putDouble("id",anchor.hashCode());
+            map.putDouble("projection",anchor.hashCode());
+            map.putDouble("viewMap",anchor.hashCode());
+            if (callback != null) {
+                callback.planeHitDetected(map);
+            }
+        }
+    }
+
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         Log.e(TAG, "onSurfaceChanged");
+
         mDisplayRotationHelper.onSurfaceChanged(width, height);
         GLES20.glViewport(0, 0, width, height);
     }
@@ -285,14 +256,17 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
     @Override
     public void onDrawFrame(GL10 gl) {
         Log.e(TAG, "onDrawFrame");
+
         // Clear screen to notify driver it should not load any pixels from previous frame.
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
         if (mSession == null) {
             return;
         }
         // Notify ARCore session that the view size changed so that the perspective matrix and
         // the video background can be properly adjusted.
         mDisplayRotationHelper.updateSessionIfNeeded(mSession);
+
         try {
             // Obtain the current frame from ARSession. When the configuration is set to
             // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
@@ -335,6 +309,7 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
             // Get camera matrix and draw.
             float[] viewmtx = new float[16];
             camera.getViewMatrix(viewmtx, 0);
+
             // Compute lighting from average intensity of the image.
             final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
           /*  // Visualize tracked points.
@@ -409,6 +384,7 @@ public class RNReactNativeArCoreView extends LinearLayout implements GLSurfaceVi
 
     private void showLoadingMessage() {
         showSnackbarMessage("Searching for surfaces...", false);
+
     }
 
     private void hideLoadingMessage() {

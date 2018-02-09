@@ -14,7 +14,7 @@ public class RNReactNativeArcoreViewManager extends ViewGroupManager<RNReactNati
     public static final String PROPS_VIEW_MODE = "viewMode";
 
 
-    private RNReactNativeArcoreModule mContextModule;
+    public static  RNReactNativeArcoreModule mContextModule;
 
 
     public RNReactNativeArcoreViewManager(ReactApplicationContext reactContext) {
@@ -35,7 +35,7 @@ public class RNReactNativeArcoreViewManager extends ViewGroupManager<RNReactNati
 
     @Override
     protected RNReactNativeArcoreMainView createViewInstance(ThemedReactContext reactContext) {
-        return new RNReactNativeArcoreMainView(reactContext, mContextModule.getActivity());
+        return new RNReactNativeArcoreMainView(reactContext);
     }
 
     @Override
