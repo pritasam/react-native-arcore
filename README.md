@@ -6,11 +6,11 @@
 
 ## Getting started
 
-`$ npm install react-native-react-native-arcore --save`
+`$ npm install react-native-arcore --save`
 
 ### Mostly automatic installation
 
-`$ react-native link react-native-react-native-arcore`
+`$ react-native link react-native-arcore`
 
 ### Manual installation
 
@@ -22,12 +22,12 @@
   - Add `new RNReactNativeArcorePackage()` to the list returned by the `getPackages()` method
 2. Append the following lines to `android/settings.gradle`:
   	```
-  	include ':react-native-react-native-arcore'
-  	project(':react-native-react-native-arcore').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-react-native-arcore/android')
+  	include ':react-native-arcore'
+  	project(':react-native-arcore').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-arcore/android')
   	```
 3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
   	```
-      compile project(':react-native-react-native-arcore')
+      compile project(':react-native-arcore')
   	```
 4. Copy the  Folder Google from /libraries/m2repository/com  into the   node_modules/react-native/android/com/
 
