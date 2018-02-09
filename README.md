@@ -2,7 +2,7 @@
 
 
 
-# react-native-react-native-arcore
+# react-native-arcore
 
 ## Getting started
 
