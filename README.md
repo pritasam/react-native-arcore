@@ -17,7 +17,7 @@
 
 #### Android
 
-1. Open up `android   /Users/pritambolenwar/Repository/ReactNative/Nightshift/node_modules/react-native/android/app/src/main/java/[...]/MainActivity.java`
+1. Open up `android  node_modules/react-native/android/app/src/main/java/[...]/MainActivity.java`
   - Add `import com.reactlibrary.RNReactNativeArcorePackage;` to the imports at the top of the file
   - Add `new RNReactNativeArcorePackage()` to the list returned by the `getPackages()` method
 2. Append the following lines to `android/settings.gradle`:
