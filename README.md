@@ -41,9 +41,22 @@
 
 ## Usage
 ```javascript
-import RNReactNativeArcore from 'react-native-react-native-arcore';
+import ARCORE from 'react-native-arcore';
 
 // TODO: What to do with the module?
-RNReactNativeArcore;
+ render() {
+       return (
+        <View style={styles.container}>
+        <ARCORE
+          style={{ flex: 1 , width: '100%'  , height: '100%' }}
+          onPlaneHitDetected={this._onPlanTappedevent.bind(this)}
+          onPlaneDetected={this._onPlaneDetectedEvent.bind(this)}
+          >
+        </ARCORE>
+        
+        </View>
+       );
+    }
+
 ```
   
