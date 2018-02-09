@@ -33,8 +33,36 @@
 
 5. Copy the  Folder include from /libraries/include  into the   node_modules/react-native/android/
 
+6. Add following code in Mainactivity in your application to request for the Camera 
+
+```java
+
+ @Override
+    protected void onResume() {
+        super.onResume();
+        // ARCore requires camera permissions to operate. If we did not yet obtain runtime
+        // permission on Android M and above, now is a good time to ask the user for it.
+        if (!CameraPermissionHelper.hasCameraPermission(this)) {
+               CameraPermissionHelper.requestCameraPermission(this);
+        }
+    }
+
+  @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        if (!CameraPermissionHelper.hasCameraPermission(this)) {
+            Toast.makeText(this,"Camera permission is needed to run this application", Toast.LENGTH_LONG).show();
+            if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
+                // Permission denied with checking "Do not ask again".
+                CameraPermissionHelper.launchPermissionSettings(this);
+            }
+            finish();
+        }
+    }
+   
+```
 
 ## Usage
+
 ```javascript
 import ARCORE from 'react-native-arcore';
 
