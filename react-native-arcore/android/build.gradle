@@ -2,10 +2,6 @@
 buildscript {
     repositories {
         jcenter()
-        maven {
-            name 'Google'
-            url "libraries/m2repository"
-        }
     }
 
     dependencies {
@@ -18,9 +14,9 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "27.0.0"
+    buildToolsVersion "25.0.3"
     defaultConfig {
-        minSdkVersion 24
+        minSdkVersion 16
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -28,24 +24,27 @@ android {
     lintOptions {
         abortOnError false
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 
 repositories {
     mavenCentral()
-    maven {
-        name 'Google'
-        url "libraries/m2repository"
-    }
+
 }
 
 dependencies {
     compile 'de.javagl:obj:0.2.1'
-    compile 'com.google.ar:core:0.91.0'
+    compile 'com.google.ar:core:1.5.0'
     compile 'com.facebook.react:react-native:+'
     compile group: 'com.drewnoakes', name: 'metadata-extractor', version: '2.9.1'
     compile "com.google.zxing:core:3.2.1"
-    compile 'com.android.support:design:+'
-    compile 'com.android.support:appcompat-v7:+'
+    compile 'com.android.support:design:27.1.1'
+    compile 'com.android.support:appcompat-v7:27.1.1'
+//    sourceCompatibility = 1.8
+//    targetCompatibility = 1.8
 }
   

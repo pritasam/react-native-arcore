@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="com.google.ar:core-0.91.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.android/build-cache/81b8c3ded1b236d4eabcd819075f17ea473e488c/output/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/81b8c3ded1b236d4eabcd819075f17ea473e488c/output/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

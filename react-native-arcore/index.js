@@ -5,20 +5,12 @@ var ReactNative = require('react-native');
 var React = require('react');
 var PropTypes = require('prop-types');
 var {
-    findNodeHandle, 
-    Platform, 
-    NativeModules, 
-    ViewPropTypes, 
-    requireNativeComponent, 
+    requireNativeComponent,
     View,
     UIManager,
     DeviceEventEmitter,
-    NativeAppEventEmitter,
     Text,
 } = ReactNative;
-
-
-const ArCoreManager = NativeModules.RNReactNativeArcore;
 
 class ARCORE extends React.Component {
 
@@ -26,10 +18,10 @@ class ARCORE extends React.Component {
         super();
         this.onChange = this.onChange.bind(this);
         this.subscriptions = [];
-        ArCoreManager.show();
     }
 
     onChange(event) {
+
 
         if(event.nativeEvent.planeDetected){
             if (!this.props.onPlaneDetected) {
@@ -52,13 +44,8 @@ class ARCORE extends React.Component {
 
     }
 
-    _getHandle() {
-        return findNodeHandle(this.map);
-    }
-
     componentDidMount() {
 
-        console.log("changes");
         if (this.props.onPlaneDetected) {
             let sub = DeviceEventEmitter.addListener(
                 'onPlaneDetected',
@@ -74,6 +61,7 @@ class ARCORE extends React.Component {
             );
             this.subscriptions.push(sub);
         }
+
     }
 
     componentWillUnmount() {
@@ -83,10 +71,13 @@ class ARCORE extends React.Component {
 
     render() {
         return (
-            <RNArcoreView {...this.props}
-             onChange={this.onChange}
-               ref={ref => { this.map = ref; }}
-             />
+        //    /*
+            <RNReactNativeArcoreModule {...this.props} onChange={this.onChange}
+            >
+            </ RNReactNativeArcoreModule>
+         //   */
+
+                     //         <Text style={{color: 'red'}}>  and red  </Text>
         );
     }
 }
@@ -96,10 +87,9 @@ ARCORE.propTypes = {
    viewMode: PropTypes.string
 };
 
-var RNArcoreView = requireNativeComponent('RNArcoreView', ARCORE, {
-    nativeOnly: { onChange: true,
-    nativeBackgroundAndroid: true,
-    nativeForegroundAndroid: true }
+
+var RNReactNativeArcoreModule = requireNativeComponent('RNReactNativeArcoreModule', ARCORE, {
+    nativeOnly: { onChange: true }
 });
 
 module.exports = ARCORE;

@@ -5,7 +5,6 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
-import com.facebook.react.uimanager.annotations.ReactProp;
 
 import javax.annotation.Nullable;
 
@@ -13,7 +12,9 @@ public class RNReactNativeArcoreViewManager extends ViewGroupManager<RNReactNati
 
     public static final String PROPS_VIEW_MODE = "viewMode";
 
-    public static  RNReactNativeArcoreModule mContextModule;
+
+    private RNReactNativeArcoreModule mContextModule;
+
 
     public RNReactNativeArcoreViewManager(ReactApplicationContext reactContext) {
         mContextModule = new RNReactNativeArcoreModule(reactContext);
@@ -21,10 +22,12 @@ public class RNReactNativeArcoreViewManager extends ViewGroupManager<RNReactNati
 
     @Override
     public String getName() {
-        return "RNArcoreView";
+        return "RNReactNativeArcoreModule";
     }
 
-    @ReactProp(name = PROPS_VIEW_MODE)
+
+    
+   // @ReactProp(name = PROPS_VIEW_MODE)
     public void setViewMode(RNReactNativeArcoreMainView view, @Nullable String viewMode) {
         if (view != null) {
             // view.setViewMode(viewMode);
@@ -33,7 +36,7 @@ public class RNReactNativeArcoreViewManager extends ViewGroupManager<RNReactNati
 
     @Override
     protected RNReactNativeArcoreMainView createViewInstance(ThemedReactContext reactContext) {
-        return new RNReactNativeArcoreMainView(reactContext);
+        return new RNReactNativeArcoreMainView(reactContext, mContextModule.getActivity());
     }
 
     @Override
