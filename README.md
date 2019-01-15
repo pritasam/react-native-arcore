@@ -33,9 +33,63 @@
 
 ## Usage
 
+
+
+```In Android Manifest file
+
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    Add  above  permisions 
+     
+     
+    <application
+
+        <meta-data android:name="com.google.ar.core" android:value="optional" />
+
+   </application>
+   
+   Add above metadate under the application tag
+```
+
 ```javascript
 import ARCORE from 'react-native-arcore';
 
+
+
+ async requestCameraPermission() {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          'title': 'Cool Photo App Camera Permission',
+          'message': 'Cool Photo App needs access to your camera ' +
+                     'so you can take awesome pictures.',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      } else {
+        console.log(currentConsoleTag, "Camera permission denied");
+      }
+    } catch (err) {
+      console.log(currentConsoleTag, "METHOD: requestCameraPermission", err);
+    }
+  }
+  
+  Also request the Camera permision before showing the ARCORE 
+
+  _onPlaneDetectedEvent(result) {
+    console.log(result);
+  }
+
+  _onPlanTappedevent(result) {
+    console.log(result);
+  }
+  
 // TODO: What to do with the module?
  render() {
        return (
