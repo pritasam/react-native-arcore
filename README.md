@@ -29,13 +29,12 @@
   	```
       compile project(':react-native-arcore')
   	```
-```
-
+    
 ## Usage
 
 
 
-```In Android Manifest file
+In Android Manifest file
 
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -44,17 +43,15 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.CAMERA" />
 
-    Add  above  permisions 
+Add above permissions 
      
      
     <application
-
         <meta-data android:name="com.google.ar.core" android:value="optional" />
-
-   </application>
+    </application>
    
-   Add above metadate under the application tag
-```
+Add above metadata under the application tag
+
 
 ```javascript
 import ARCORE from 'react-native-arcore';
@@ -80,7 +77,7 @@ import ARCORE from 'react-native-arcore';
     }
   }
   
-  Also request the Camera permision before showing the ARCORE 
+  // Also request the Camera permission before showing the ARCORE 
 
   _onPlaneDetectedEvent(result) {
     console.log(result);
